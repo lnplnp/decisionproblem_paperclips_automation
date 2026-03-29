@@ -21,7 +21,7 @@ Ce projet automatise les actions répétitives dans le jeu [Universal Paperclips
  | Clic automatique     | Fabrique des trombones jusqu’à débloquer les autoclippers.                  | `paperclipAutomator`      |
  | Achat de clippers    | Achte le clipper le moins cher disponible selon les fonds.                 | `clipperBuyer`            |
  | Gestion des prix     | Ajuste le prix pour maintenir une demande à 100%.                           | `priceManager`            |
- | Achat de projets     | Achte tous les projets disponibles (sauf exclusions).                       | `projectBuyer`            |
+ | Achat de projets     | Achète tous les projets disponibles (sauf exclusions).                       | `projectBuyer`            |
  | Ressources           | Équilibre mémoire (cible : 70) et processeurs.                             | `resourceBuyer`           |
  | Quantum Computing    | Automatise les opérations quantiques une fois débloquées.                   | `quantumComputer`         |
  | Tournois             | Gère les inscriptions et les stratégies de tournoi.                        | `tournamentHandler`       |
