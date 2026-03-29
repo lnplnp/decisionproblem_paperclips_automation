@@ -19,7 +19,7 @@ Ce projet automatise les actions répétitives dans le jeu [Universal Paperclips
    Module               | Description                                                                 | Objet JavaScript          |
  |----------------------|-----------------------------------------------------------------------------|---------------------------|
  | Clic automatique     | Fabrique des trombones jusqu’à débloquer les autoclippers.                  | `paperclipAutomator`      |
- | Achat de clippers    | Achte le clipper le moins cher disponible selon les fonds.                 | `clipperBuyer`            |
+ | Achat de clippers    | Achète le clipper le moins cher disponible selon les fonds.                 | `clipperBuyer`            |
  | Gestion des prix     | Ajuste le prix pour maintenir une demande à 100%.                           | `priceManager`            |
  | Achat de projets     | Achète tous les projets disponibles (sauf exclusions).                       | `projectBuyer`            |
  | Ressources           | Équilibre mémoire (cible : 70) et processeurs.                             | `resourceBuyer`           |

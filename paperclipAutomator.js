@@ -28,28 +28,21 @@ const paperclipAutomator = {
     isRunning: false,
     intervalId: null,
 
-    /**
-     * Extrait une valeur numérique d'un élément HTML.
-     * @param {string} elementId - ID de l'élément HTML.
-     * @param {boolean} [allowDecimals=true] - Autorise les décimaux.
-     * @param {boolean} [isAmericanFormat=true] - Format américain (ex: 1,000).
-     * @returns {number} - Valeur numérique extraite.
-     */
-    getNumericValue: function(elementId, allowDecimals = true, isAmericanFormat = true) {
-        const element = document.getElementById(elementId);
-        if (!element) return 0;
+	/**
+	 * Vérifie et améliore automatiquement l'investissement si le coût est couvert.
+	 */
+	checkAndUpgradeInvestments: function () {
+		const investmentEngine = document.getElementById('investmentEngine')
+		if (investmentEngine && investmentEngine.disabled) {
+			const yomiDisplay = getNumericValue('yomiDisplay');
+			const investUpgradeCost = getNumericValue('investUpgradeCost');
 
-        let text = element.textContent.trim();
-        text = text.replace(/[^\d,-.]/g, '');
-
-        if (isAmericanFormat) {
-            text = text.replace(/,/g, '');
-        } else {
-            text = text.replace(/\./g, '').replace(/,/, '.');
-        }
-
-        return allowDecimals ? parseFloat(text) : Math.floor(parseFloat(text));
-    },
+			if (yomiDisplay > investUpgradeCost) {
+				document.getElementById('btnImproveInvestments').click();
+				console.log('Amélioration des investissements effectuée.');
+			}
+		}
+	},
 
     /**
      * Clique automatiquement sur "Make Paperclip" jusqu'à ce qu'un autoclipper soit disponible.
@@ -71,12 +64,9 @@ const paperclipAutomator = {
             if ((autoClipperButton && !autoClipperButton.disabled) ||
                 (megaClipperButton && !megaClipperButton.disabled)) {
 				wireBuyer.start();
-				clipperBuyer.start(); // Démarre l'achat automatique des clippers
-				console.log('Autoclipper disponible ! Lancement de l\'achat automatique.');
-				priceManager.start(); // Démarre l'ajustement du prix
-				console.log('Autoclipper disponible ! Achat et ajustement du prix activés.');
+				clipperBuyer.start();
+				DemandBasedPricing.start();
 				projectBuyer.start();
-				console.log('Autoclipper disponible ! Achat et ajustement du prix activés.');
 				resourceBuyer.start();
 				quantumComputer.start();
 			}
@@ -105,13 +95,13 @@ const clipperBuyer = {
      * Achte le clipper le moins cher disponible si les fonds le permettent.
      */
     buyCheapestClipper: function() {
-        const funds = paperclipAutomator.getNumericValue('funds');
+        const funds = getNumericValue('funds');
         const autoClipperButton = document.getElementById('btnMakeClipper');
         const megaClipperButton = document.getElementById('btnMakeMegaClipper');
 
         // Vérifie si les boutons existent et ne sont pas désactivés
         if (autoClipperButton && !autoClipperButton.disabled) {
-            const autoClipperCost = paperclipAutomator.getNumericValue('clipperCost'); // Remplace par l'ID réel du coût
+            const autoClipperCost = getNumericValue('clipperCost'); // Remplace par l'ID réel du coût
             if (funds >= autoClipperCost) {
                 autoClipperButton.click();
                 console.log('Achat d\'un AutoClipper');
@@ -120,7 +110,7 @@ const clipperBuyer = {
         }
 
         if (megaClipperButton && !megaClipperButton.disabled) {
-            const megaClipperCost = paperclipAutomator.getNumericValue('megaClipperCost'); // Remplace par l'ID réel du coût
+            const megaClipperCost = getNumericValue('megaClipperCost'); // Remplace par l'ID réel du coût
             if (funds >= megaClipperCost) {
                 megaClipperButton.click();
                 console.log('Achat d\'un MegaClipper');
@@ -217,53 +207,10 @@ const wireBuyer = {
 };
 
 
-// Objet pour gérer l'ajustement automatique du prix
-const priceManager = {
-    isRunning: false,
-    intervalId: null,
-
-    /**
-     * Ajuste le prix pour maintenir la demande à 100%.
-     */
-    adjustPriceForMaxDemand: function() {
-        const demand = paperclipAutomator.getNumericValue('demand');
-        if (demand < 100) {
-            const lowerPriceButton = document.getElementById('btnLowerPrice');
-            if (lowerPriceButton && !lowerPriceButton.disabled) {
-                lowerPriceButton.click();
-                console.log('Baisse du prix pour augmenter la demande à 100%.');
-            }
-        }
-        // Optionnel : Si tu veux maximiser les profits, tu peux ajouter une logique pour augmenter le prix si la demande est très élevée (>95%) et que les ventes sont bonnes.
-    },
-
-    /**
-     * Démarre l'ajustement automatique du prix.
-     */
-    start: function() {
-        if (this.isRunning) return;
-
-        this.isRunning = true;
-        this.intervalId = setInterval(() => {
-            this.adjustPriceForMaxDemand();
-        }, 2000); // Vérifie toutes les 2 secondes
-    },
-
-    /**
-     * Arrête l'ajustement automatique du prix.
-     */
-    stop: function() {
-        if (this.intervalId) {
-            clearInterval(this.intervalId);
-            this.intervalId = null;
-            this.isRunning = false;
-        }
-    }
-};
-
 // Liste des projets à exclure (par texte affiché)
 const EXCLUDED_PROJECTS = [
-    "Release the HypnoDrones",
+    "Quantum Temporal Reversion",
+	"Release the HypnoDrones",
     "Space Exploration"
 ];
 
@@ -286,7 +233,7 @@ const projectBuyer = {
      * Achete tous les projets disponibles et non exclus.
      */
     buyAvailableProjects: function() {
-        const funds = paperclipAutomator.getNumericValue('funds');
+        const funds = getNumericValue('funds');
         // Sélectionne tous les boutons de projet visibles et non désactivés
         const projectButtons = document.querySelectorAll('.projectButton:not([disabled]):not([style*="visibility: hidden"])');
 
@@ -333,8 +280,8 @@ const resourceBuyer = {
      * Achte des ressources (mémoire ou processeurs) selon la stratégie.
      */
     buyResources: function() {
-        const memory = paperclipAutomator.getNumericValue('memory');
-        const processors = paperclipAutomator.getNumericValue('processors');
+        const memory = getNumericValue('memory');
+        const processors = getNumericValue('processors');
 
         // Boutons d'achat
         const btnAddMem = document.getElementById('btnAddMem');
@@ -442,5 +389,74 @@ const quantumComputer = {
         }
     }
 };
+
+const DemandBasedPricing = {
+  // Configuration centralisée
+  config: {
+    checkInterval: 5000, // Intervalle de vérification (ms)
+  },
+
+  intervalId: null,
+
+  // État interne
+  lastPD: 0,
+
+  /**
+   * Récupère la PD actuelle depuis le DOM.
+   * @returns {number}
+   */
+  getCurrentPD: function() {
+    return getNumericValue('demand');
+  },
+  
+  /**
+   * Ajuste le prix selon les règles métiers.
+   */
+  adjustPrice: function() {
+    const currentPD = this.getCurrentPD();
+
+    if (this.lastPD === 0) {
+      this.lastPD = currentPD;
+      return;
+    }
+
+    const isPDIncreasing = currentPD > this.lastPD;
+    const isPDAbove100 = currentPD > 100;
+
+	
+    if (isPDAbove100 && isPDIncreasing) {
+      document.getElementById('btnRaisePrice').click();
+      console.log(`[DemandBasedPricing] PD ${currentPD.toFixed(1)}% (↑) → Prix augmenté.`);
+    } else {
+      document.getElementById('btnLowerPrice').click();
+      console.log(`[DemandBasedPricing] PD ${currentPD.toFixed(1)}% (≤100% ou ↓) → Prix baissé.`);
+    }
+	
+	if (getNumericValue('margin') < 0.1) {
+      document.getElementById('btnRaisePrice').click();
+	}
+		
+
+    this.lastPD = currentPD;
+  },
+
+  /**
+   * Démarre l'automatisme.
+   */
+  start: function() {
+    console.log('[DemandBasedPricing] Automatisme activé.');
+    this.intervalId = setInterval(() => this.adjustPrice(), this.config.checkInterval);
+  },
+
+  /**
+   * Arrête l'automatisme (si besoin).
+   */
+  stop: function() {
+    // Implémentation si tu veux ajouter un clearInterval plus tard.
+    clearInterval(this.intervalId);
+    console.log('[DemandBasedPricing] Automatisme désactivé.');
+  }
+};
+
 
 paperclipAutomator.start();
